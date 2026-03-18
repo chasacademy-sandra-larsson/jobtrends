@@ -127,7 +127,7 @@ export default function Home() {
                 label={{ value: "Publicerade annonser / vecka", angle: -90, position: "insideLeft", style: { fontSize: 12, fill: "#71717a" } }}
               />
               <Tooltip
-                labelFormatter={(label: string) => `Vecka: ${label}`}
+                labelFormatter={(label) => `Vecka: ${label}`}
               />
               <Legend />
               {trends.terms.map((term, i) =>

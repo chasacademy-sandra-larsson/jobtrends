@@ -1,65 +1,159 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Brush,
+} from "recharts";
+
+const COLORS = [
+  "#2563eb", "#dc2626", "#16a34a", "#d97706", "#7c3aed",
+  "#db2777", "#0891b2", "#65a30d", "#ea580c", "#6366f1",
+  "#14b8a6", "#f43f5e", "#8b5cf6", "#059669", "#f59e0b",
+];
+
+interface TrendResponse {
+  terms: string[];
+  data: Record<string, string | number>[];
+}
 
 export default function Home() {
+  const [trends, setTrends] = useState<TrendResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [visibleTerms, setVisibleTerms] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    fetch("/api/trends")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch trends");
+        return res.json();
+      })
+      .then((json: TrendResponse) => {
+        setTrends(json);
+        setVisibleTerms(new Set(json.terms));
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  const toggleTerm = (term: string) => {
+    setVisibleTerms((prev) => {
+      const next = new Set(prev);
+      if (next.has(term)) {
+        next.delete(term);
+      } else {
+        next.add(term);
+      }
+      return next;
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-lg text-zinc-500">Laddar trenddata...</p>
+      </div>
+    );
+  }
+
+  if (error || !trends) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-lg text-red-500">Fel: {error}</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-8">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
+          JobTrends
+        </h1>
+        <p className="text-zinc-500 dark:text-zinc-400 mb-6">
+          Veckovis publicerade jobbannonser per sökord (källa: JobTech API)
+        </p>
+
+        <nav className="flex gap-4 mb-6">
+          <Link href="/" className="text-sm font-medium text-blue-600 dark:text-blue-400 underline underline-offset-4">
+            Trender
+          </Link>
+          <Link href="/skills" className="text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors">
+            Kompetenser
+          </Link>
+        </nav>
+
+        <div className="flex flex-wrap gap-2 mb-6">
+          {trends.terms.map((term, i) => (
+            <button
+              key={term}
+              onClick={() => toggleTerm(term)}
+              className="px-3 py-1 rounded-full text-sm font-medium transition-colors border"
+              style={{
+                backgroundColor: visibleTerms.has(term) ? COLORS[i % COLORS.length] : "transparent",
+                color: visibleTerms.has(term) ? "white" : COLORS[i % COLORS.length],
+                borderColor: COLORS[i % COLORS.length],
+              }}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              {term}
+            </button>
+          ))}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="bg-white dark:bg-zinc-900 rounded-xl shadow p-6 mb-8">
+          <ResponsiveContainer width="100%" height={500}>
+            <LineChart data={trends.data}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" />
+              <XAxis
+                dataKey="weekStart"
+                tick={{ fontSize: 12 }}
+                tickFormatter={(val: string) => val.slice(0, 7)}
+                interval="preserveStartEnd"
+              />
+              <YAxis
+                tick={{ fontSize: 12 }}
+                label={{ value: "Publicerade annonser / vecka", angle: -90, position: "insideLeft", style: { fontSize: 12, fill: "#71717a" } }}
+              />
+              <Tooltip
+                labelFormatter={(label: string) => `Vecka: ${label}`}
+              />
+              <Legend />
+              {trends.terms.map((term, i) =>
+                visibleTerms.has(term) ? (
+                  <Line
+                    key={term}
+                    type="monotone"
+                    dataKey={term}
+                    stroke={COLORS[i % COLORS.length]}
+                    strokeWidth={2}
+                    dot={false}
+                    name={term}
+                  />
+                ) : null
+              )}
+              <Brush
+                dataKey="weekStart"
+                height={30}
+                stroke="#2563eb"
+                tickFormatter={(val: string) => val.slice(0, 7)}
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
-      </main>
+
+      </div>
     </div>
   );
 }

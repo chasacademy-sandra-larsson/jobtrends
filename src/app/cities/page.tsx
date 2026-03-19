@@ -3,25 +3,25 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-interface SkillEntry {
+interface CityEntry {
   keyword: string;
   count: number;
 }
 
-interface SkillsResponse {
+interface CitiesResponse {
   totalAds: number;
-  skills: SkillEntry[];
+  cities: CityEntry[];
 }
 
-export default function SkillsPage() {
-  const [skills, setSkills] = useState<SkillsResponse | null>(null);
+export default function CitiesPage() {
+  const [cities, setCities] = useState<CitiesResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/skills")
+    fetch("/api/cities")
       .then((res) => res.json())
-      .then((json: SkillsResponse) => {
-        setSkills(json);
+      .then((json: CitiesResponse) => {
+        setCities(json);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -30,12 +30,12 @@ export default function SkillsPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-lg text-zinc-500">Laddar kompetensdata...</p>
+        <p className="text-lg text-zinc-500">Laddar stadsdata...</p>
       </div>
     );
   }
 
-  if (!skills) {
+  if (!cities) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-lg text-red-500">Kunde inte ladda data</p>
@@ -50,38 +50,38 @@ export default function SkillsPage() {
           JobTrends
         </h1>
         <p className="text-zinc-500 dark:text-zinc-400 mb-6">
-          Baserat på {skills.totalAds} aktiva annonser (SSYK 2512) — antal annonser som nämner varje teknologi
+          Baserat på {cities.totalAds} aktiva annonser (SSYK 2512) — antal annonser som nämner varje stad
         </p>
 
         <nav className="flex gap-4 mb-6">
           <Link href="/" className="text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors">
             Trender
           </Link>
-          <Link href="/skills" className="text-sm font-medium text-blue-600 dark:text-blue-400 underline underline-offset-4">
+          <Link href="/skills" className="text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors">
             Kompetenser
           </Link>
-          <Link href="/cities" className="text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors">
+          <Link href="/cities" className="text-sm font-medium text-blue-600 dark:text-blue-400 underline underline-offset-4">
             Städer
           </Link>
         </nav>
 
         <div className="bg-white dark:bg-zinc-900 rounded-xl shadow p-6">
           <div className="flex flex-wrap items-center justify-center gap-3 py-8">
-            {skills.skills.map((s) => {
-              const max = skills.skills[0].count;
-              const min = skills.skills[skills.skills.length - 1].count;
-              const ratio = max === min ? 1 : (s.count - min) / (max - min);
+            {cities.cities.map((c) => {
+              const max = cities.cities[0].count;
+              const min = cities.cities[cities.cities.length - 1].count;
+              const ratio = max === min ? 1 : (c.count - min) / (max - min);
               const fontSize = 14 + ratio * 48;
               const opacity = 0.4 + ratio * 0.6;
 
               return (
                 <span
-                  key={s.keyword}
-                  className="inline-block cursor-default transition-transform hover:scale-110 text-blue-600 dark:text-blue-400"
+                  key={c.keyword}
+                  className="inline-block cursor-default transition-transform hover:scale-110 text-emerald-600 dark:text-emerald-400"
                   style={{ fontSize: `${fontSize}px`, opacity }}
-                  title={`${s.keyword}: ${s.count} annonser`}
+                  title={`${c.keyword}: ${c.count} annonser`}
                 >
-                  {s.keyword}
+                  {c.keyword}
                 </span>
               );
             })}

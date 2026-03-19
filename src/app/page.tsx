@@ -93,6 +93,9 @@ export default function Home() {
           <Link href="/skills" className="text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors">
             Kompetenser
           </Link>
+          <Link href="/cities" className="text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors">
+            Städer
+          </Link>
         </nav>
 
         <div className="flex flex-wrap gap-2 mb-6">

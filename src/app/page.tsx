@@ -128,6 +128,7 @@ export default function Home() {
               />
               <Tooltip
                 labelFormatter={(label) => `Vecka: ${label}`}
+                itemSorter={(item) => -(item.value as number)}
               />
               <Legend />
               {trends.terms.map((term, i) =>
